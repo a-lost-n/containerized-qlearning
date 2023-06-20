@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: master-deployment
+spec:
+  selector:
+    matchLabels:
+      app: master-pod
+  template:
+    metadata:
+      labels:
+        app: master-pod
+    spec:
+      containers:
+      - name: master-container
+        image: your-master-image:tag
