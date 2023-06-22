@@ -2,11 +2,22 @@ import numpy as np
 import gymnasium as gym
 import requests
 import json
+import time
 from gymnasium.envs.toy_text.frozen_lake import generate_random_map
+from kubernetes import client, config
 
-worker_list_url = "http://127.0.0.1:5000/pods"
-response = requests.get(worker_list_url)
-worker_list = response.json()
+# Load the in-cluster Kubernetes configuration
+config.load_incluster_config()
+
+# Create an instance of the Kubernetes API client
+v1 = client.CoreV1Api()
+
+# Retrieve the IP addresses of the worker pods
+worker_ips = []
+pods = v1.list_namespaced_pod(namespace="default", label_selector="app=worker")
+for pod in pods.items:
+    print(pod.status.pod_ip)
+    worker_ips.append(pod.status.pod_ip)
 
 class Master():
 
@@ -24,8 +35,12 @@ class Master():
                            'map': self.map})
 
     def train(self):
-        for worker_url in worker_list_url:
-            response = requests.post(worker_url, json=self.export())
+        qtables = []
+        for worker_ip in worker_ips:
+            response = requests.post(f"http://{worker_ip}:5000/train",
+                                     json=self.export())
+            qtables.append(response.json()['qtable'])
+        self.qtable = np.mean(np.array(qtables), axis=0)
 
     def test_run(self):
         state = self.environment.reset()[0]
@@ -53,3 +68,12 @@ class Master():
                 if last_n.pop(0) == 'Success': successes -= 1
             last_n_success.append(successes/len(last_n))
         return last_n_success
+
+
+if __name__ == '__main__':
+    master = Master(10)
+    t1 = time.perf_counter()
+    master.train()
+    t2 = time.perf_counter()
+    print(t2 - t1)
+    print(master.test_run())

@@ -13,4 +13,4 @@ spec:
     spec:
       containers:
       - name: master-container
-        image: your-master-image:tag
+        image: freewer/master:latest

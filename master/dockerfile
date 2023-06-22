@@ -3,8 +3,11 @@ FROM python:3.9
 WORKDIR /app
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install numpy
+RUN pip install requests
+RUN pip install kubernetes
+RUN pip install gymnasium
 
-COPY app.py .
+COPY master.py .
 
-CMD ["python", "app.py"]
+CMD ["python", "master.py"]

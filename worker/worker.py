@@ -44,8 +44,8 @@ class Worker():
 
 @app.route('/train', methods=['POST'])
 def train_batch():
-    qtable = np.array(request.json['qtable'])
-    map = request.json['map']
+    qtable = np.array(request.json.get('qtable'))
+    map = request.json.get('map')
     worker = Worker(qtable, map)
     worker.train()
     return worker.export()
