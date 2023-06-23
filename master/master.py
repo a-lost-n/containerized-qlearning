@@ -14,7 +14,7 @@ v1 = client.CoreV1Api()
 
 # Retrieve the IP addresses of the worker pods
 worker_ips = []
-pods = v1.list_namespaced_pod(namespace="default", label_selector="app=worker")
+pods = v1.list_namespaced_pod(namespace="default", label_selector="app=worker-node")
 for pod in pods.items:
     print(pod.status.pod_ip)
     worker_ips.append(pod.status.pod_ip)

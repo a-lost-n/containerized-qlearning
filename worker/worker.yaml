@@ -6,15 +6,15 @@ spec:
   replicas: 3  # Adjust the number of replicas as per your requirements
   selector:
     matchLabels:
-      app: worker-node
+      app: worker
   template:
     metadata:
       labels:
-        app: worker-node
+        app: worker
     spec:
       containers:
-      - name: worker-node
+      - name: worker-container
         image: freewer/worker:latest
-        env:
-        - name: MASTER_NODE_URL
-          value: http://master-node  # Use the service name of master node
+        # env:
+        # - name: MASTER_NODE_URL
+        #   value: http://master-node  # Use the service name of master node
