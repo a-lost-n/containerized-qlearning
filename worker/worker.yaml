@@ -15,6 +15,3 @@ spec:
       containers:
       - name: worker-container
         image: freewer/worker:latest
-        # env:
-        # - name: MASTER_NODE_URL
-        #   value: http://master-node  # Use the service name of master node

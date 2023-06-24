@@ -1,7 +1,7 @@
 import numpy as np
 import gymnasium as gym
 import json
-from flask import Flask, request
+from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
@@ -40,16 +40,16 @@ class Worker():
             epsilon = max(epsilon - epsilon_decay, 0)
     
     def export(self):
-        return json.dumps({'qtable': self.qtable.tolist()})
+        return {'qtable': self.qtable.tolist()}
 
 @app.route('/train', methods=['POST'])
 def train_batch():
     qtable = np.array(request.json.get('qtable'))
     map = request.json.get('map')
+    episodes = request.json.get('episodes')
     worker = Worker(qtable, map)
-    worker.train()
-    return worker.export()
+    worker.train(episodes)
+    return jsonify(worker.export())
 
 if __name__ == '__main__':
-    # app.run(host='0.0.0.0', port=5000)
-    app.run()
+    app.run(host='0.0.0.0', port=5000)

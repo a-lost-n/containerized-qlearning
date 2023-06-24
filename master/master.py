@@ -14,14 +14,14 @@ v1 = client.CoreV1Api()
 
 # Retrieve the IP addresses of the worker pods
 worker_ips = []
-pods = v1.list_namespaced_pod(namespace="default", label_selector="app=worker-node")
+pods = v1.list_namespaced_pod(namespace="default", label_selector="app=worker")
 for pod in pods.items:
     print(pod.status.pod_ip)
     worker_ips.append(pod.status.pod_ip)
 
 class Master():
 
-    def __init__(self, grid_size=10):
+    def __init__(self, grid_size=6):
         self.grid_size = grid_size
         self.qtable = np.zeros((grid_size**2, 4))
         self.map = generate_random_map(size=grid_size)
@@ -31,8 +31,9 @@ class Master():
                                     render_mode='ansi')
 
     def export(self):
-        return json.dumps({'qtable': self.qtable.tolist(),
-                           'map': self.map})
+        return {'qtable': self.qtable.tolist(),
+                           'map': self.map,
+                           'episodes': 1000}
 
     def train(self):
         qtables = []
