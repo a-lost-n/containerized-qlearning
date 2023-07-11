@@ -11,6 +11,12 @@ build:
 	kubectl apply -f roles/roleAccount.yaml
 	kubectl apply -f roles/roleBinding.yaml
 
+minikube:
+	minikube start
+
+stop:
+	minikube stop
+
 pod-info:
 	kubectl get pods
 

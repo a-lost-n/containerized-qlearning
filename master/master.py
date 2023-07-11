@@ -1,8 +1,9 @@
 import numpy as np
 import gymnasium as gym
-import requests
 import json
+import asyncio
 import time
+import aiohttp
 from gymnasium.envs.toy_text.frozen_lake import generate_random_map
 from kubernetes import client, config
 
@@ -30,18 +31,25 @@ class Master():
                                     is_slippery=False,
                                     render_mode='ansi')
 
-    def export(self):
+    def export(self, episodes=1000):
         return {'qtable': self.qtable.tolist(),
                            'map': self.map,
-                           'episodes': 1000}
+                           'episodes': episodes}
 
-    def train(self):
+    async def send_and_fetch_tables(self):
         qtables = []
-        for worker_ip in worker_ips:
-            response = requests.post(f"http://{worker_ip}:5000/train",
-                                     json=self.export())
-            qtables.append(response.json()['qtable'])
-        self.qtable = np.mean(np.array(qtables), axis=0)
+        async with aiohttp.ClientSession() as session:
+            for worker_ip in worker_ips:
+                url = f"http://{worker_ip}:5000/train"
+                async with session.post(url, json=self.export()) as response:
+                    data = await response.json()
+                    qtables.append(data['qtable'])
+        return qtables
+
+    def train(self, episodes=15000, episodes_per_worker=1000):
+        for _ in range(0, episodes, episodes_per_worker*len(worker_ips)):
+            qtables = asyncio.run(self.send_and_fetch_tables())
+            self.qtable = np.mean(np.array(qtables), axis=0)
 
     def test_run(self):
         state = self.environment.reset()[0]
