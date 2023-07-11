@@ -21,7 +21,7 @@ class Environment():
     def copy(self):
         return Environment(self.grid_size, self.qtable, self.environment)
     
-    def train(self, episodes, alpha=0.5, gamma=0.9, epsilon=1.0, epsilon_decay=0.01):
+    def train(self, episodes, alpha=0.5, gamma=0.9, epsilon=1.0, epsilon_decay=0.9999):
         self.outcomes = []
         for _ in range(episodes):
             state = self.environment.reset()[0]
@@ -51,7 +51,7 @@ class Environment():
                         self.outcomes[-1] = "Success"
                     break
                     
-            epsilon = max(epsilon - epsilon_decay, 0)
+            epsilon = max(epsilon*epsilon_decay, 0.001)
 
     def test_run(self):
         state = self.environment.reset()[0]

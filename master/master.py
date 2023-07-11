@@ -30,26 +30,30 @@ class Master():
                                     desc=self.map,
                                     is_slippery=False,
                                     render_mode='ansi')
+        self.epsilon = 1.0
+        self.epsilon_decay = 0.9999
 
     def export(self, episodes=1000):
         return {'qtable': self.qtable.tolist(),
-                           'map': self.map,
-                           'episodes': episodes}
+                'map': self.map,
+                'episodes': episodes,
+                'epsilon': self.epsilon}
 
-    async def send_and_fetch_tables(self):
+    async def send_and_fetch_tables(self, episodes_per_worker):
         qtables = []
         async with aiohttp.ClientSession() as session:
             for worker_ip in worker_ips:
                 url = f"http://{worker_ip}:5000/train"
-                async with session.post(url, json=self.export()) as response:
+                async with session.post(url, json=self.export(episodes=episodes_per_worker)) as response:
                     data = await response.json()
                     qtables.append(data['qtable'])
         return qtables
 
-    def train(self, episodes=15000, episodes_per_worker=1000):
+    def train(self, episodes=30000, episodes_per_worker=5000):
         for _ in range(0, episodes, episodes_per_worker*len(worker_ips)):
-            qtables = asyncio.run(self.send_and_fetch_tables())
+            qtables = asyncio.run(self.send_and_fetch_tables(episodes_per_worker))
             self.qtable = np.mean(np.array(qtables), axis=0)
+            self.epsilon = max(self.epsilon * self.epsilon_decay**(episodes_per_worker*len(worker_ips)), 0.001)
 
     def test_run(self):
         state = self.environment.reset()[0]
@@ -82,7 +86,7 @@ class Master():
 if __name__ == '__main__':
     master = Master(10)
     t1 = time.perf_counter()
-    master.train()
+    master.train(episodes=180000)
     t2 = time.perf_counter()
     print(t2 - t1)
     print(master.test_run())

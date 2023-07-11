@@ -14,7 +14,7 @@ class Worker():
                                     is_slippery=False,
                                     render_mode='ansi')
     
-    def train(self, episodes, alpha=0.5, gamma=0.9, epsilon=1.0, epsilon_decay=0.01):
+    def train(self, episodes, alpha=0.5, gamma=0.9, epsilon=1.0, epsilon_decay=0.9997):
 
         for _ in range(episodes):
             state = self.environment.reset()[0]
@@ -37,7 +37,7 @@ class Worker():
                 if terminated:
                     break
                     
-            epsilon = max(epsilon - epsilon_decay, 0)
+            epsilon = max(epsilon*epsilon_decay, 0.001)
     
     def export(self):
         return {'qtable': self.qtable.tolist()}
@@ -47,8 +47,9 @@ def train_batch():
     qtable = np.array(request.json.get('qtable'))
     map = request.json.get('map')
     episodes = request.json.get('episodes')
+    epsilon = request.json.get('epsilon')
     worker = Worker(qtable, map)
-    worker.train(episodes)
+    worker.train(episodes, epsilon=epsilon)
     return jsonify(worker.export())
 
 if __name__ == '__main__':
