@@ -1,4 +1,4 @@
-build-image:
+image:
 	docker build -t freewer/worker:latest worker/.
 	docker build -t freewer/master:latest master/.
 
