@@ -15,3 +15,4 @@ spec:
       containers:
       - name: worker-container
         image: freewer/worker:latest
+        command: ["python", "-u", "/app/worker.py"]

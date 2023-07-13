@@ -1,5 +1,6 @@
 import numpy as np
 import gymnasium as gym
+import time
 from gymnasium.envs.toy_text.frozen_lake import generate_random_map
 
 class Environment():
@@ -17,41 +18,28 @@ class Environment():
                                         render_mode='ansi')
         else:
             self.environment = environment
-        
-    def copy(self):
-        return Environment(self.grid_size, self.qtable, self.environment)
+
     
-    def train(self, episodes, alpha=0.5, gamma=0.9, epsilon=1.0, epsilon_decay=0.9999):
-        self.outcomes = []
-        for _ in range(episodes):
+    def train(self, alpha=0.5, gamma=0.9):
+        episodes = 0
+        t1 = time.perf_counter()
+        while np.amax(self.qtable[0]) == 0:
             state = self.environment.reset()[0]
             truncated = False
-
-            self.outcomes.append("Failure")
-
-            while not truncated:
-                rnd = np.random.random()
-
-                if rnd < epsilon or np.argmax(self.qtable[state]) == 0:
+            terminated = False
+            while not truncated and not terminated:
+                if np.argmax(self.qtable[state]) == 0:
                     action = self.environment.action_space.sample()
-
                 else:
                     action = np.argmax(self.qtable[state])
-                        
-
                 new_state, reward, terminated, truncated, _ = self.environment.step(action)
-
                 self.qtable[state][action] = self.qtable[state][action] +\
                       alpha * (reward + gamma * np.max(self.qtable[new_state]) - self.qtable[state][action])
-
                 state = new_state
-
-                if terminated:
-                    if reward:
-                        self.outcomes[-1] = "Success"
-                    break
-                    
-            epsilon = max(epsilon*epsilon_decay, 0.001)
+            episodes += 1
+        t2 = time.perf_counter()
+        print("Solution was found after {:.2f}s and {} episodes.".format(t2-t1,episodes))
+        return t2-t1, episodes
 
     def test_run(self):
         state = self.environment.reset()[0]
@@ -68,14 +56,3 @@ class Environment():
                     return "Success"
         return "Inconclusive"
     
-    def last_n_sucesses(self, n):
-        last_n_success = []
-        last_n = []
-        successes = 0
-        for outcome in self.outcomes:
-            last_n.append(outcome)
-            if outcome == 'Success': successes += 1
-            if len(last_n) > n:
-                if last_n.pop(0) == 'Success': successes -= 1
-            last_n_success.append(successes/len(last_n))
-        return last_n_success

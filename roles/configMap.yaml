@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-variables
+data:
+  grid_size: "10"
+  episodes: "1000000"
+  episodes_per_worker: "10000"
