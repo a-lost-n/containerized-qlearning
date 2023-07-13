@@ -11,10 +11,13 @@ spec:
       labels:
         app: master-pod
     spec:
+      volumes:
+      - name: model-volume
+        emptyDir: {}
       containers:
       - name: master-container
         image: freewer/master:latest
-        command: ["python", "-u", "/app/master.py", $(GRID_SIZE), $(EPISODES), $(EPISODES_PER_WORKER)]
+        command: ["python", "-u", "/app/master.py", "$(GRID_SIZE)", "$(EPISODES)", "$(EPISODES_PER_WORKER)"]
         env:
           - name: GRID_SIZE
             valueFrom:
@@ -31,3 +34,6 @@ spec:
               configMapKeyRef:
                 name: my-variables
                 key: episodes_per_worker
+        volumeMounts:
+        - name: model-volume
+          mountPath: /app/model

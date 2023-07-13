@@ -17,3 +17,6 @@ pod-info:
 
 clean:
 	kubectl delete --all deployment
+
+get-model:
+	kubectl cp $(id):/app/model/model.npz /home/freewer/cloud/containerized-qlearning/model/model.npz

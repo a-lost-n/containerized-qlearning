@@ -10,5 +10,3 @@ RUN pip install gymnasium
 COPY master.py .
 
 RUN mkdir model
-
-# CMD ["python", "-u", "master.py"]

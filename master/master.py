@@ -115,7 +115,7 @@ if __name__ == '__main__':
     episodes_per_worker = int(sys.argv[3])
     master = Master(grid_size=grid_size)
     master.train(episodes=episodes, episodes_per_worker=episodes_per_worker)
-    np.savez("model/model.h5",master.qtable)
+    np.savez("model/model.npz",qtable=master.qtable,map=master.map)
     # seconds_vec = []
     # episodes_vec = []
     # for _ in range(10):
