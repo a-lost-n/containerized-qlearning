@@ -2,6 +2,7 @@ import numpy as np
 import gymnasium as gym
 import time
 from gymnasium.envs.toy_text.frozen_lake import generate_random_map
+from IPython.display import clear_output
 
 class Environment():
 
@@ -54,9 +55,12 @@ class Environment():
             new_state, reward, terminated, truncated, _ = self.environment.step(action)
 
             state = new_state
+            clear_output()
+
+            print(self.environment.render())
+            time.sleep(1)
 
             if terminated:
-                if reward:
-                    return "Success"
+                return "Success"
         return "Inconclusive"
     

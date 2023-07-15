@@ -11,6 +11,12 @@ build:
 	kubectl apply -f worker/worker-service.yaml
 	kubectl apply -f master/master.yaml
 	kubectl apply -f master/master-service.yaml
+	kubectl apply -f grafana/grafanaConfig.yaml
+	kubectl apply -f grafana/grafanaDeployment.yaml
+	kubectl apply -f grafana/grafanaService.yaml
+
+monitor:
+	kubectl port-forward -n monitoring $(id) 3000 &
 
 pod-info:
 	kubectl get pods
